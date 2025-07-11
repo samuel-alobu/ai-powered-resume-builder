@@ -9,9 +9,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { personalInfoSchema, PersonalInfoValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { EditorFormProps } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 export default function PersonalInfoForm({
   resumeData,
@@ -39,6 +40,8 @@ export default function PersonalInfoForm({
     return unsubscribe;
   }, [form, resumeData, setResumeData]);
 
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div className="space-y-1.5 text-center">
@@ -53,22 +56,37 @@ export default function PersonalInfoForm({
             render={({ field: { value, ...fieldValues } }) => (
               <FormItem>
                 <FormLabel>Your Photo</FormLabel>
-                <FormControl>
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      {...fieldValues}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        fieldValues.onChange(file);
-                      }}
-                    />
-                    <p className="text-muted-foreground text-sm">
-                      Upload a profile photo (optional)
-                    </p>
-                  </div>
-                </FormControl>
+                <div className="flex items-center gap-2">
+                  <FormControl>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        {...fieldValues}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          fieldValues.onChange(file);
+                          if (photoInputRef.current) {
+                            photoInputRef.current.value = "";
+                          }
+                        }}
+                        ref={photoInputRef}
+                      />
+                      <p className="text-muted-foreground text-sm">
+                        Upload a profile photo (optional)
+                      </p>
+                    </div>
+                  </FormControl>
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    onClick={() => {
+                      fieldValues.onChange(null);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
