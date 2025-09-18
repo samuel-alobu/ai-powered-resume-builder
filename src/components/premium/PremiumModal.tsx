@@ -6,6 +6,8 @@ import { Button } from "../ui/button";
 import usePremiumModal from "@/hooks/usePremiumModal";
 import { useState } from "react";
 import { useToast } from "@/hooks/useToast";
+import { createCheckoutSession } from "./actions";
+import { env } from "@/env";
 
 const premiumFeatures = ["AI tools", "Up to 3 resumes"];
 const premiumPlusFeatures = ["Infinite resumes", "Design customization"];
@@ -19,6 +21,9 @@ export default function PremiumModal() {
 
   async function handlePremiumClick(priceId: string) {
     try {
+      setLoading(true);
+      const redirectUrl = await createCheckoutSession(priceId);
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error(error);
       toast({
@@ -30,7 +35,14 @@ export default function PremiumModal() {
     }
   }
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!loading) {
+          setOpen(open);
+        }
+      }}
+    >
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Resume Builder AI Premium</DialogTitle>
@@ -51,7 +63,7 @@ export default function PremiumModal() {
               <Button
                 onClick={() =>
                   handlePremiumClick(
-                    process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY!,
+                    env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY,
                   )
                 }
                 disabled={loading}
@@ -76,7 +88,7 @@ export default function PremiumModal() {
                   variant="premium"
                   onClick={() =>
                     handlePremiumClick(
-                      process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY!,
+                      env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY,
                     )
                   }
                   disabled={loading}
